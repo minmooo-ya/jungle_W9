@@ -1,0 +1,12 @@
+FAIL
+Kernel panic in run: PANIC at ../../threads/interrupt.c:361 in intr_handler(): Unexpected interrupt
+Call stack: 0x80042135ba 0x80042089f4 0x8004208da6 0x8004210abd 0x8004206b04 0x8004206827 0x80042067dd 0x800420613d
+Translation of call stack:
+0x00000080042135ba: debug_panic (lib/kernel/debug.c:32)
+0x00000080042089f4: intr_handler (threads/interrupt.c:365)
+0x0000008004208da6: intr_entry (threads/intr-stubs.o:?)
+0x0000008004210abd: printf (lib/stdio.c:80)
+0x0000008004206b04: thread_print_stats (threads/thread.c:181)
+0x0000008004206827: print_stats (threads/init.c:360)
+0x00000080042067dd: power_off (threads/init.c:347)
+0x000000800420613d: main (threads/init.c:127)

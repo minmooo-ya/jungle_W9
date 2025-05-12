@@ -91,10 +91,10 @@ struct thread {
 	enum thread_status status;          /* Thread state. */
 	char name[16];                      /* Name (for debugging purposes). */
 	int priority;                       /* Priority. */
-
+	int64_t wake_up_tick;
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
-
+	
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	uint64_t *pml4;                     /* Page map level 4 */
@@ -113,6 +113,9 @@ struct thread {
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
+extern struct list sleep_list;
+// thread.h
+struct list *get_ready_list(void);
 
 void thread_init (void);
 void thread_start (void);
@@ -125,6 +128,7 @@ tid_t thread_create (const char *name, int priority, thread_func *, void *);
 
 void thread_block (void);
 void thread_unblock (struct thread *);
+bool thread_cmp_priority(const struct list_elem *, const struct list_elem *, void *);
 
 struct thread *thread_current (void);
 tid_t thread_tid (void);
@@ -132,6 +136,8 @@ const char *thread_name (void);
 
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);
+void thread_sleep(int64_t wakeup_tick);
+void thread_awake(int64_t now_tick);
 
 int thread_get_priority (void);
 void thread_set_priority (int);

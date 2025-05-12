@@ -29,6 +29,7 @@ static bool too_many_loops (unsigned loops);
 static void busy_wait (int64_t loops);
 static void real_time_sleep (int64_t num, int32_t denom);
 
+
 /* Sets up the 8254 Programmable Interval Timer (PIT) to
    interrupt PIT_FREQ times per second, and registers the
    corresponding interrupt. */
@@ -43,6 +44,7 @@ timer_init (void) {
 	outb (0x40, count >> 8);
 
 	intr_register_ext (0x20, timer_interrupt, "8254 Timer");
+	
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -93,8 +95,8 @@ timer_sleep (int64_t ticks) {
 	int64_t start = timer_ticks ();
 
 	ASSERT (intr_get_level () == INTR_ON);
-	while (timer_elapsed (start) < ticks)
-		thread_yield ();
+	if (timer_elapsed (start) < ticks)
+		thread_sleep(start + ticks);	//현재 tick + 대기시간
 }
 
 /* Suspends execution for approximately MS milliseconds. */
@@ -126,6 +128,16 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
+	thread_awake(ticks);
+
+	// struct list *ready = get_ready_list();  // 이 위치로 이동
+
+	//     // 여기서만 intr_yield_on_return() 써야 함!
+	// if (!list_empty(ready)) {
+	// 	struct thread *top = list_entry(list_front(ready), struct thread, elem);
+	// 	if (thread_current()->priority < top->priority)
+	// 		intr_yield_on_return();
+	// }
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
@@ -163,6 +175,7 @@ busy_wait (int64_t loops) {
 static void
 real_time_sleep (int64_t num, int32_t denom) {
 	/* Convert NUM/DENOM seconds into timer ticks, rounding down.
+
 
 	   (NUM / DENOM) s
 	   ---------------------- = NUM * TIMER_FREQ / DENOM ticks.
