@@ -17,21 +17,27 @@ Executing 'mlfqs-block':
 (mlfqs-block) Block thread should have already acquired lock.
 (mlfqs-block) end
 Execution of 'mlfqs-block' complete.
-Timer: 3026 ticks
-Thread: 500 idle ticks, 2526 kernel ticks, 0 user ticks
-Interrupt 0x0e (#PF Page-Fault Exception) at rip=8004234000
+Timer: 3023 ticks
+Thread: 499 idle ticks, 2525 kernel ticks, 0 user ticks
+Console: 793 characters output
+Interrupt 0x0d (#GP General Protection Exception) at rip=8004210d1f00
  cr2=0000000000000000 error=               0
-rax 0000000000000000 rbx 0000000000204400 rcx 00000080040b8000 rdx 00000000000003d4
-rsp 0000008004000f10 rbp 0000008004000f30 rsi 000000000000800f rdi 0000000000000001
-rip 0000008004234000 r8 0000008004000ec8  r9 00000080042168a2 r10 0000000000000000
+rax 0000000000008504 rbx 0000000000204400 rcx 0000000000000000 rdx 0000000000000001
+rsp 0000008004000f3f rbp 0000800423403000 rsi 0000008004234050 rdi 0000008004220a60
+rip 00008004210d1f00 r8 0000008004000ec8  r9 0000008004216b04 r10 0000000000000000
 r11 0000000000000000 r12 0000000000000000 r13 0000000000000000 r14 0000000000000000
-r15 0000000000000000 rflags 00200246
+r15 0000000000000000 rflags 00200202
 es: 0010 ds: 0010 cs: 0008 ss: 0010
 Kernel PANIC at ../../threads/interrupt.c:361 in intr_handler(): Unexpected interrupt
-Call stack: 0x80042135ba 0x80042089f4 0x8004208da6 0x8004210abd 0x8004206b04 0x8004206827 0x80042067dd 0x800420613d.
-The `backtrace' program can make call stacks useful.
-Read "Backtraces" in the "Debugging Tools" chapter
-of the Pintos documentation for more information.
-Timer: 3027 ticks
-Thread: 500 idle ticks, 2527 kernel ticks, 0 user ticks
-Console: 1
+Call stack: 0x800421381c 0x8004208a5c 0x8004208e0eInterrupt 0x0d (#GP General Protection Exception) at rip=8004210856
+ cr2=0000000000000000 error=               0
+rax 0000800423403000 rbx 0000000000204400 rcx 00000080040b8000 rdx 00000000000003d4
+rsp 0000008004000da0 rbp 0000008004000db0 rsi 000000000000b20f rdi 0000000000000000
+rip 0000008004210856 r8 0000008004000cb8  r9 0000008004216b04 r10 0000000000000000
+r11 0000000000000000 r12 0000000000000000 r13 0000000000000000 r14 0000000000000000
+r15 0000000000000000 rflags 00200006
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Kernel PANIC recursion at ../../threads/interrupt.c:361 in intr_handler().
+Timer: 3025 ticks
+Thread: 499 idle ticks, 2526 kernel ticks, 0 user ticks
+Console: 2

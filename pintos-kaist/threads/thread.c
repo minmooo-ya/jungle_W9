@@ -414,8 +414,17 @@ void thread_awake(int64_t now_tick) {
 
 void thread_set_priority(int new_priority)
 {
-    thread_current()->priority = new_priority;
-    // project1 : priority schedule
+	struct thread *curr = thread_current();
+
+	curr->init_priority = new_priority;
+
+	if (list_empty(&curr->hold_list)) {
+		// 도네이션 받은 게 없다면 즉시 반영
+		curr->priority = new_priority;
+	} else {
+		// 도네이션 받은 게 있을 수 있으므로 우선순위 재계산
+		refresh_priority();
+	}
     thread_test_preemption(); // priority가 변경되었으니까 우선순위 변경 확인
 }
 
@@ -513,6 +522,11 @@ init_thread (struct thread *t, const char *name, int priority) {
 	strlcpy (t->name, name, sizeof t->name);
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
 	t->priority = priority;
+
+	t->init_priority = priority;
+	t->waiting_on_lock = NULL;
+	list_init(&t->hold_list);
+
 	t->magic = THREAD_MAGIC;
 }
 

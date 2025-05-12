@@ -212,9 +212,20 @@ lock_acquire (struct lock *lock) {
 	ASSERT (lock != NULL);
 	ASSERT (!intr_context ());
 	ASSERT (!lock_held_by_current_thread (lock));
+   
+   struct thread *curr = thread_current();
+
+
+   if (lock -> holder != NULL){
+      curr -> waiting_on_lock = lock;
+      donate_priority();
+   }
 
 	sema_down (&lock->semaphore);
-	lock->holder = thread_current ();
+   
+   curr->waiting_on_lock = NULL;
+	lock->holder = curr;
+   list_push_back(&curr->hold_list, &lock->elem);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -236,6 +247,22 @@ lock_try_acquire (struct lock *lock) {
 	return success;
 }
 
+void donate_priority(void){
+   struct thread *curr = thread_current();
+   struct lock *lock = curr -> waiting_on_lock;
+
+   if(lock == NULL) return;
+
+   struct thread *holder = lock -> holder;
+   if(holder == NULL) return;
+
+   while (lock != NULL && lock->holder != NULL && lock->holder->priority < curr->priority) {
+      lock->holder->priority = curr->priority;
+      curr = lock->holder;
+      lock = curr->waiting_on_lock;
+   }
+}
+
 /* Releases LOCK, which must be owned by the current thread.
    This is lock_release function.
 
@@ -246,9 +273,28 @@ void
 lock_release (struct lock *lock) {
 	ASSERT (lock != NULL);
 	ASSERT (lock_held_by_current_thread (lock));
-
+   
+   list_remove(&lock->elem);
+   refresh_priority();
 	lock->holder = NULL;
 	sema_up (&lock->semaphore);
+}
+
+void refresh_priority(void) {
+	struct thread *curr = thread_current();
+	int max_priority = curr->init_priority;
+
+	struct list_elem *e;
+	for (e = list_begin(&curr->hold_list); e != list_end(&curr->hold_list); e = list_next(e)) {
+		struct lock *l = list_entry(e, struct lock, elem);
+		if (!list_empty(&l->semaphore.waiters)) {
+			struct thread *t = list_entry(list_front(&l->semaphore.waiters), struct thread, elem);
+			if (t->priority > max_priority)
+				max_priority = t->priority;
+		}
+	}
+
+	curr->priority = max_priority;
 }
 
 /* Returns true if the current thread holds LOCK, false
